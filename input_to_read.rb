@@ -25,6 +25,8 @@ def main
 
     output_data( ini, new_read_xlsx_path, data_hash_for_output  )
 
+    #ここに見栄えを整える関数を入れたい
+
     old_read_xlsx_path = ini["common"]["read_xlsx"]
     FileUtils.cp( new_read_xlsx_path, old_read_xlsx_path + ".backup" )
     #初回実行時はこのファイルは存在しないので、存在するときだけ古い方のファイルを削除
@@ -39,19 +41,15 @@ def main
 end
 
 def make_data_for_output( ini, input_data_hash, read_data_hash )
-  puts input_data_hash
   data = Hash.new
   input_data_hash.each_key { |tag_name|
-    puts tag_name
     if data[tag_name].nil? then
       data[tag_name] = Hash.new
     end
 
     input_data_hash[tag_name].each_key { |tag_num|
-      puts tag_num
 
       if read_data_hash.has_key?( tag_name ) and read_data_hash[tag_name].has_key?( tag_num )
-        puts "aaa"
         data[tag_name][tag_num] = read_data_hash[tag_name][tag_num]
 
       else
