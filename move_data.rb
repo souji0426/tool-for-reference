@@ -37,7 +37,14 @@ def move_input_file( ini, data_hash )
         end
 
         name = data_hash[tag_name][tag_num]["name"]
-        file_name = "[#{tag}]#{name}"
+        file_name = String.new
+        #ファイル名に使えない文字が含まれていないかのチェック。その場合はタグのみをファイル名にする
+        #動画とかWEBページなどはそういう文字がタイトルに含まれている可能性が高い
+        if /\?/ === name or /\|/ === name then
+          file_name = "[#{tag}]"
+        else
+          file_name = "[#{tag}]#{name}"
+        end
         FileUtils.cp( input_file_path, "#{target_dir}/#{file_name}#{File.extname( input_file_path )}" )
         FileUtils.rm( input_file_path )
       }
