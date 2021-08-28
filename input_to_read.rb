@@ -3,6 +3,7 @@ require "inifile"
 require "fileutils"
 #ファイル操作に必要
 require "rubyXL"
+require "rubyXL/convenience_methods"
 #xlsxに書き込むために使用
 
 require "./Common_method.rb"
@@ -18,14 +19,14 @@ def main
   #新規登録がなければ何もしない
   if !new_data_in_input_xlsx.empty? then
 
-    reference_dir_path =  ini["common"]["reference_dir_path"]
-    new_read_xlsx_path = reference_dir_path + "新文献情報閲覧用.xlsx"
-
     data_hash_for_output = make_data_for_output( ini, data_in_input_xlsx, data_in_read_xlsx )
 
+    reference_dir_path =  ini["common"]["reference_dir_path"]
+    new_read_xlsx_path = reference_dir_path + "新文献情報閲覧用.xlsx"
     output_data( ini, new_read_xlsx_path, data_hash_for_output  )
 
     #ここに見栄えを整える関数を入れたい
+    edit_the_formatting( new_read_xlsx_path, new_data_in_input_xlsx )
 
     old_read_xlsx_path = ini["common"]["read_xlsx"]
     FileUtils.cp( new_read_xlsx_path, old_read_xlsx_path + ".backup" )
@@ -150,6 +151,21 @@ def output_one_data( ini, book, hash, tag_name, tag_num )
     end
 
   end
+end
+
+def edit_the_formatting( new_read_xlsx_path, new_data_hash )
+  book = RubyXL::Parser.parse( new_read_xlsx_path )
+
+  #新規登録された情報を分かりやすくするために、該当するセルに色をつける
+  new_data_hash.each_key { |tag_name|
+    new_data_hash[tag_name].each_key { |tag_num|
+      sheet = book[tag_name]
+      row = tag_num
+      sheet.change_row_fill( row, "ffff00" ) 
+    }
+  }
+
+  book.write( new_read_xlsx_path )
 end
 
 main()
