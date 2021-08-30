@@ -31,10 +31,17 @@ def output_bib( ini, data_hash )
     data_hash.each_key { |tag_name|
       data_hash[tag_name].each_key { |tag_num|
         data_array = data_hash[tag_name][tag_num]
-        f.write( "@#{data_array[0]}{#{data_array[1]}\n".encode( Encoding::SJIS ) )
+        
+        f.write( "@#{data_array[0]}{#{data_array[1]},\n".encode( Encoding::SJIS ) )
+
         for i in 2..data_array.length-1 do
-          f.write( "\t#{data_array[i]}\n".encode( Encoding::SJIS ) )
+          if i != data_array.length-1 then
+            f.write( "\t#{data_array[i]},\n".encode( Encoding::SJIS ) )
+          else
+            f.write( "\t#{data_array[i]}\n".encode( Encoding::SJIS ) )
+          end
         end
+
         f.write( "}\n\n".encode( Encoding::SJIS ) )
       }
     }
