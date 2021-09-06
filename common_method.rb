@@ -1,4 +1,5 @@
 module Common_method
+  
   def read_input_xlsx( ini )
     data = {}
     input_xlsx_path = ini["common"]["input_xlsx"]

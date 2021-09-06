@@ -14,7 +14,7 @@ def main
 
   data_hash_for_output = make_output_data( ini, data_in_input_xlsx )
 
-  add_note_data( ini, data_hash_for_output )
+  add_note_data( ini, data_hash_for_output, data_in_input_xlsx )
 
   output_csv( ini, data_hash_for_output )
 
@@ -78,18 +78,43 @@ def make_output_data( ini, input_xlsx_hash )
   return data
 end
 
-def add_note_data( ini, data_hash )
-  data_hash.each_key { |tag_name|
+def add_note_data( ini, data_hash_for_output, data_in_input_xlsx )
+  data_hash_for_output.each_key { |tag_name|
     explanatory_text_dir = ini["common"]["explanatory_text_dir"]
     target_dir = "#{explanatory_text_dir}#{tag_name}"
-    data_hash[tag_name].each_key { |tag_num|
-      file_path = "#{target_dir}/#{data_hash[tag_name][tag_num][1]}.tex"
+    data_hash_for_output[tag_name].each_key { |tag_num|
+
+
+      array_for_str = Array.new
+
+      #説明文用texファイルの内容を取得
+      explanatory_text_str = ""
+      file_path = "#{target_dir}/#{data_hash_for_output[tag_name][tag_num][1]}.tex"
       if File.size( file_path ) != 0 then
         File.open( file_path ) { |f|
           #texファイルはShift_JISだから、UTF-8に変換しておく
-          str = File.read( f,:encoding => Encoding::Shift_JIS ).encode( Encoding::UTF_8 )
-          data_hash[tag_name][tag_num].push( "note={#{str}}" )
+          explanatory_text_str = File.read( f, :encoding => Encoding::Shift_JIS ).encode( Encoding::UTF_8 )
+          array_for_str.push( explanatory_text_str )
         }
+      end
+
+      #入手場所もしくは公式URLを取得。存在すれば追記。
+      if data_in_input_xlsx[tag_name][tag_num]["url"] != "null" then
+        url = data_in_input_xlsx[tag_name][tag_num]["url"]
+        array_for_str.push( "\\url\{#{url}\}" )
+      end
+
+      #AmazonでのURLを取得。存在すれば追記。
+      if data_in_input_xlsx[tag_name][tag_num]["amazon_url"] != "null" then
+        amazon_url = data_in_input_xlsx[tag_name][tag_num]["amazon_url"]
+        array_for_str.push( "\\href\{#{amazon_url}\}\{AmazonのURL\}" )
+      end
+
+      str = ""
+      str = array_for_str.join( "\{\\ \\\\\}" )
+
+      if str != "" then
+        data_hash_for_output[tag_name][tag_num].push( "note={#{str}}" )
       end
     }
   }
