@@ -22,7 +22,7 @@ module Common_method
     not_last = true
     counter = 0
     while not_last do
-      if sheet.nil? or sheet[counter].nil? or sheet[counter][0].value.nil? then
+      if sheet.nil? or sheet[counter].nil? or sheet[counter][0].nil? or sheet[counter][0].value.nil? then
         not_last = false
         counter-=1
       else
