@@ -37,6 +37,7 @@ Excelで文献登録も文献情報閲覧もやりたくなった。<br>
 必須モジュールは以下のもの
 - inifile（インストールは"gem install inifile"）
 - RubyXL（インストールは"gem install rubyXL"）
+
 文献管理用フォルダを用意し、その中に「tool」というフォルダを作成、このリポジトリをクローンする。<br>
 setting.iniのcommon項目を全て編集する。<br>
 編集が完了したらstart.rbを実行する。すると設定したディレクトリが全て作成される。<br>
