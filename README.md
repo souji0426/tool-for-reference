@@ -33,8 +33,10 @@ Excelで文献登録も文献情報閲覧もやりたくなった。<br>
 
 ## 準備
 開発環境はwindows 8マシン<br>
-言語はRubyで、バージョンはruby 2.7.1p83 (2020-03-31 revision a0c7c23c9c) [x64-mingw32]<br>
-必須モジュールはRubyXL（インストールは"gem install rubyXL"）<br>
+言語はRubyで、バージョンはruby 3.0.2p107 (2021-07-07 revision 0db68f0233) [x64-mingw32]<br>
+必須モジュールは以下のもの
+- inifile（インストールは"gem install inifile"）
+- RubyXL（インストールは"gem install rubyXL"）
 文献管理用フォルダを用意し、その中に「tool」というフォルダを作成、このリポジトリをクローンする。<br>
 setting.iniのcommon項目を全て編集する。<br>
 編集が完了したらstart.rbを実行する。すると設定したディレクトリが全て作成される。<br>
