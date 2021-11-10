@@ -52,13 +52,19 @@ def make_output_data( ini, input_xlsx_hash )
 
       for i in 2..bib_item_array.length-1 do
         if input_xlsx_hash[tag_name][tag_num][xlsx_item_array[i-2]] != "null" then
+
+          #翻訳された文献でかつ翻訳者が分かっている場合は著者を翻訳者にする
+          if bib_item_array[i] == "translator" then
+            one_data_hash["author"] = input_xlsx_hash[tag_name][tag_num][xlsx_item_array[i-2]]
+
           #この項目にある「&」はTeX用に「\&」に変換しておく
-          if bib_item_array[i] == "publisher" or bib_item_array[i] == "journal" then
+          elsif bib_item_array[i] == "publisher" or bib_item_array[i] == "journal" then
             #gsub( /&/, "\\&")では変換されなかったのでこうなった
             one_data_hash[bib_item_array[i]] =  input_xlsx_hash[tag_name][tag_num][xlsx_item_array[i-2]].gsub( /&/, "#{92.chr}#{92.chr}#{38.chr}" )
           else
             one_data_hash[bib_item_array[i]] = input_xlsx_hash[tag_name][tag_num][xlsx_item_array[i-2]]
           end
+
         end
       end
 
