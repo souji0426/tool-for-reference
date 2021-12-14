@@ -17,6 +17,7 @@ sub main {
   my $setting = Config::Tiny->read( $setting_ini_path );
   #common_subroutines
   my $data_in_input_csv = get_data_in_csv( $setting, "input" );
+  #common_subroutines
   my $data_in_read_csv = get_data_in_csv( $setting, "read" );
   my $for_output_hash = make_for_output_hash( $setting, $data_in_input_csv, $data_in_read_csv );
   output_for_read_csv( $setting, $for_output_hash );
@@ -28,13 +29,32 @@ sub make_for_output_hash {
   foreach my $tag_name ( keys %{$data_in_input_csv} ) {
     foreach my $tag_num ( sort keys %{$data_in_input_csv->{$tag_name}} ) {
       if ( exists $data_in_read_csv->{$tag_name}->{$tag_num} ) {
-        $data{$tag_name}{$tag_num} = $data_in_read_csv->{$tag_name}->{$tag_num}
+        $data{$tag_name}{$tag_num} = $data_in_read_csv->{$tag_name}->{$tag_num};
+        update_data( \%data, $data_in_input_csv, $data_in_read_csv, $tag_name, $tag_num );
       } else {
         make_data( $setting, \%data, $data_in_input_csv, $tag_name, $tag_num );
       }
     }
   }
   return \%data;
+}
+
+sub update_data {
+  my ( $data, $data_in_input_csv, $data_in_read_csv, $tag_name, $tag_num ) = @_;
+  foreach my $item ( keys %{$data_in_input_csv->{$tag_name}->{$tag_num}} ) {
+    my $target_item_in_input_csv = $data_in_input_csv->{$tag_name}->{$tag_num}->{$item};
+    my $target_item_in_read_csv = $data_in_read_csv->{$tag_name}->{$tag_num}->{$item};
+
+    if ( $target_item_in_input_csv ne "" and defined $target_item_in_read_csv ) {
+      if ( $target_item_in_read_csv eq "" ) {
+        $data->{$tag_name}->{$tag_num}->{$item} = $target_item_in_input_csv;
+        print encode( "cp932", "${tag_name}${tag_num}の${item}項目に新規登録：${target_item_in_input_csv}\n");
+      } elsif ( $target_item_in_read_csv ne "" and $target_item_in_input_csv ne $target_item_in_read_csv ) {
+        $data->{$tag_name}->{$tag_num}->{$item} = $target_item_in_input_csv;
+        print encode( "cp932", "${tag_name}${tag_num}の${item}項目に変更有り：${target_item_in_read_csv}を${target_item_in_input_csv}へ\n");
+      }
+    }
+  }
 }
 
 sub make_data {
@@ -63,19 +83,18 @@ sub make_data {
 
 sub get_file_path {
   my ( $setting, $tag_name, $tag_num ) = @_;
-  my $file_path = "null";
-  my $data_dir = $setting->{"common"}->{"data_dir"};
+  my $file_path = "";
+  my $data_dir = $setting->{"common"}->{"data_dir_path"};
   my $target_dir = $data_dir . "\\${tag_name}";
-  if ( !-d $file_path ) {
-    return $file_path;
-  }
-  opendir( my $dh, encode( "cp932", $target_dir ) );
-  while ( my $name = readdir $dh ) {
-    if ( $name =~ /^\[${tag_name}${tag_num}\]/) {
-      $file_path = $target_dir . "\\" . $name;
+  if ( -d $target_dir ) {
+    opendir( my $dh, encode( "cp932", $target_dir ) );
+    while ( my $name = readdir $dh ) {
+      if ( $name =~ /^\[${tag_name}${tag_num}\]/) {
+        $file_path = decode( "cp932", "${target_dir}/${name}" );
+      }
     }
+    closedir $dh;
   }
-  closedir $dh;
   return $file_path;
 }
 

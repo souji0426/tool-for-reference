@@ -18,7 +18,7 @@ sub main {
   my $setting = Config::Tiny->read( $setting_ini_path );
   #common_subroutines
   my $data_in_input_csv = get_data_in_csv( $setting, "input" );
-  my $memo_tex_dir = decode( "utf8", $setting->{"common"}->{"memo_tex_dir"} );
+  my $memo_tex_dir = decode( "utf8", $setting->{"common"}->{"memo_tex_dir_path"} );
 
   foreach my $tag_name ( keys %$data_in_input_csv ) {
     if ( !-d encode( "cp932", $memo_tex_dir . $tag_name ) ) {

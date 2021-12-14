@@ -34,7 +34,7 @@ sub main {
 
 sub exist_file_in_dir {
   my ( $setting ) = @_;
-  my @file_list = get_file_name_in_dir( decode( "utf8", $setting->{"common"}->{"input_file_dir"} ) );
+  my @file_list = get_file_name_in_dir( decode( "utf8", $setting->{"common"}->{"input_file_dir_path"} ) );
   my $num_of_file = @file_list;
   if ( $num_of_file == 0 ) {
     return 0;
@@ -61,7 +61,7 @@ sub get_file_name_in_dir {
 sub all_file_is_valid_name {
   my ( $setting, $data_in_input_csv ) = @_;
   my @valid_named_file_list;
-  my @file_list = get_file_name_in_dir( decode( "utf8", $setting->{"common"}->{"input_file_dir"} ) );
+  my @file_list = get_file_name_in_dir( decode( "utf8", $setting->{"common"}->{"input_file_dir_path"} ) );
   foreach my $file_name ( @file_list ) {
     my $tag;
     if ( $file_name =~ /\./ ) {
@@ -87,26 +87,32 @@ sub all_file_is_valid_name {
 
 sub move_and_rename_file {
   my ( $setting, $data_in_input_csv ) = @_;
-  my $input_file_dir = decode( "utf8", $setting->{"common"}->{"input_file_dir"} );
-  my @file_list = get_file_name_in_dir( $input_file_dir );
+  my $input_file_dir_path = decode( "utf8", $setting->{"common"}->{"input_file_dir_path"} );
+  my @file_list = get_file_name_in_dir( $input_file_dir_path );
   my $tag_and_name_list = get_all_tag_and_name( $data_in_input_csv );
   foreach my $file_name ( @file_list ) {
     $file_name =~ /\./;
     my $tag = $`;
     my $extension = $';
     if ( grep { $_ eq $tag } keys %$tag_and_name_list ) {
-      my $from = $input_file_dir . "/" . $file_name;
-      my $data_dir = decode( "utf8", $setting->{"common"}->{"data_dir"} );
+      my $from = $input_file_dir_path . "/" . $file_name;
+      my $data_dir_path = decode( "utf8", $setting->{"common"}->{"data_dir_path"} );
       my $tag_name = $tag_and_name_list->{$tag}->{"tag_name"};
       my $name = $tag_and_name_list->{$tag}->{"name"};
       my $to;
       if ( $name =~ /\?/ or $name =~ /\|/ ) {
-        $to =$data_dir . "/" . $tag_name . "/" . "\[${tag}\].${extension}";
+        $to =$data_dir_path . "/" . $tag_name . "/" . "\[${tag}\].${extension}";
       } else {
-        $to =$data_dir . "/" . $tag_name . "/" . "\[${tag}\]${name}.${extension}";
+        $to =$data_dir_path . "/" . $tag_name . "/" . "\[${tag}\]${name}.${extension}";
       }
-      move( encode( "cp932", $from ), encode( "cp932", $to ) );
-      print encode( "cp932", "${from}を${to}として移動完了\n" );
+      eval {
+        move( encode( "cp932", $from ), encode( "cp932", $to ) );
+      };
+      if ($@) {
+        print encode( "cp932", "${from}を${to}としての移動失敗\n" );
+      } else {
+        print encode( "cp932", "${from}を${to}として移動完了\n" );
+      }
     }
   }
 }

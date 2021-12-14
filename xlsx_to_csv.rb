@@ -56,7 +56,12 @@ def put_data_in_one_sheet( csv, sheet, item_array_in_xlsx )
   for num_of_row in 1..num_of_row_in_sheet do
     data_array_in_one_line = Array.new()
     for num_of_column in 0..item_array_in_xlsx.length-1 do
-      data_array_in_one_line.push( sheet[num_of_row][num_of_column].value )
+      cell = sheet[num_of_row][num_of_column]
+      if cell.value == "null" then
+        data_array_in_one_line.push( nil )
+      else
+        data_array_in_one_line.push( sheet[num_of_row][num_of_column].value )
+      end
     end
     csv.puts data_array_in_one_line
   end

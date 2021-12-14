@@ -22,8 +22,10 @@ perl -w input_csv_to_csv_for_bib.pl
 
 perl -w csv_for_bib_to_bib.pl
 
+perl -w make_csv_for_all_note_resarch_chapter.pl
+
 cd ../
 
-copy /Y "./read.csv" "C:\souji\all-note\•¶Œ£î•ñ.csv"
+copy /Y "./for_all_note_resarch_chapter.csv" "C:\souji\all-note\’²¸‘ÎÛ•¶Œ£î•ñ.csv"
 
 pause

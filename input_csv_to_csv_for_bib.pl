@@ -15,20 +15,19 @@ use common_subroutines;
 main();
 
 sub main {
-  my $program_name = basename( $0, ".pl" );
   my $setting_ini_path = "./setting.ini";
   my $setting = Config::Tiny->read( $setting_ini_path );
   #common_subroutines
   my $data_in_input_csv = get_data_in_csv( $setting, "input" );
   my %data_hash_for_output_csv;
-  my $common_data_for_output_csv = get_common_data_for_output_csv( $setting, $program_name, $data_in_input_csv );
+  my $common_data_for_output_csv = get_common_data_for_output_csv( $setting, $data_in_input_csv );
   output_csv( $setting, $common_data_for_output_csv );
 }
 
 sub get_common_data_for_output_csv {
-  my ( $setting, $program_name, $data_in_input_csv ) = @_;
+  my ( $setting, $data_in_input_csv ) = @_;
   my %data;
-  my @order_of_tag_name = split( ",", decode( "utf8", $setting->{$program_name}->{"order_of_tag_name"} ) );
+  my @order_of_tag_name = split( ",", decode( "utf8", $setting->{"common_setting_for_perl_tool"}->{"order_of_tag_name"} ) );
   my $num_of_tag_name = @order_of_tag_name;
   my $counter_for_csv = 0;
   for ( my $i = 0; $i < $num_of_tag_name; $i++ ) {
@@ -57,9 +56,9 @@ sub make_one_data {
 
   my $author = encode( "utf8", $data_in_input_csv->{$tag_name}->{$tag_num}->{"author_for_bib"} );
   my $translator = encode( "utf8", $data_in_input_csv->{$tag_name}->{$tag_num}->{"translator_for_bib"} );
-  if ( $author ne "null" and $translator eq "null" ) {
+  if ( $author ne "" and $translator eq "" ) {
     push( @data_array, "author = \{${author}\}");
-  } elsif ( $author ne "null" and $translator ne "null" ) {
+  } elsif ( $author ne "" and $translator ne "" ) {
     push( @data_array, "author = \{${translator}\}");
   }
 
@@ -68,7 +67,7 @@ sub make_one_data {
   for ( my $i = 0; $i < $num_of_item; $i++ ) {
     my $item_name = $item_list_of_bib[$i];
     my $item = encode( "utf8", $data_in_input_csv->{$tag_name}->{$tag_num}->{$item_name} );
-    if ( $item ne "null" ) {
+    if ( $item ne "" ) {
       if ( $item_name eq "publisher" or $item_name eq "journal" ) {
         if ( $item =~ /\&/ ) {
           $item =~ s/\&/\\&/g
@@ -90,7 +89,7 @@ sub make_note_data {
   my ( $setting, $data_in_input_csv, $tag_name, $tag_num ) = @_;
   my @data_array;
 
-  my $memo_tex_dir = decode( "utf8", $setting->{"common"}->{"memo_tex_dir"} );
+  my $memo_tex_dir = decode( "utf8", $setting->{"common"}->{"memo_tex_dir_path"} );
   my $memo_tex_file_path = $memo_tex_dir . "${tag_name}/${tag_num}.tex";
   if( -s encode( "cp932", $memo_tex_file_path) != 0 ) {
     open( my $fh, "<", encode( "cp932", $memo_tex_file_path) );
@@ -100,13 +99,21 @@ sub make_note_data {
   }
 
   my $url = encode( "utf8", $data_in_input_csv->{$tag_name}->{$tag_num}->{"url"} );
-  if ( $url ne "null" ) {
+  if ( $url ne "" ) {
     push( @data_array, encode( "utf8", "\\url\{${url}\}" ) );
   }
 
   my $amazon_url = encode( "utf8", $data_in_input_csv->{$tag_name}->{$tag_num}->{"amazon_url"} );
-  if ( $amazon_url ne "null" ) {
-    push( @data_array, encode( "utf8", "\\hyperlink\{${amazon_url}\}\{AmazonのURL\}" ) );
+  my %escape_characters_convert_list = (
+    "%" => "\\%",  "#" => "\\#",  "&" => "\\&", "~" => "\{\\textasciitilde\}",
+    "_" => "\_"   );
+    #"^" => "\{\\textasciicircum\}"
+  if ( $amazon_url ne "" ) {
+    foreach my $target_chr ( keys %escape_characters_convert_list ) {
+      my $converted_chr = $escape_characters_convert_list{$target_chr};
+      $amazon_url =~ s/${target_chr}/${converted_chr}/g
+    }
+    push( @data_array, encode( "utf8", "\\href\{${amazon_url}\}\{AmazonのURL\}" ) );
   }
 
   return join( "\{\\ \\\\\}", @data_array );

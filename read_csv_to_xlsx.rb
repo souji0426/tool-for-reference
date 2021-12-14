@@ -9,9 +9,6 @@ require "rubyXL/convenience_methods"
 require "csv"
 #csvを読み書きするために使用
 
-require "./Common_method.rb"
-include Common_method
-
 def main
   ini = IniFile.load( "./setting.ini" )
   read_xlsx_path = ini["common"]["read_xlsx_path"]
@@ -69,16 +66,16 @@ def output_one_line( ini, sheet, num_of_row, data_in_one_line )
   for i in 0..data_in_one_line.length-1 do
     value = data_in_one_line[i]
     #特定の項目ごとにフォーマットを変えたり、リンクを入れたりする。
-    if value != "null" and int_item_in_read_xlsx.include?( item_in_read_xlsx[i] ) then
+    if !value.nil? and int_item_in_read_xlsx.include?( item_in_read_xlsx[i] ) then
       sheet.add_cell( num_of_row, i, value.to_i )
-    elsif value != "null" and hyper_link_item_in_read_xlsx.include?( item_in_read_xlsx[i] ) then
+    elsif !value.nil? and hyper_link_item_in_read_xlsx.include?( item_in_read_xlsx[i] ) then
       link = %Q{HYPERLINK( "#{value}", "#{value}" ) }
       sheet.add_cell( num_of_row, i, value, link )
-    elsif value != "null" then
+    elsif !value.nil? then
       sheet.add_cell( num_of_row, i, value )
-    elsif value == "null" then
-      value = nil
+    elsif value.nil? then
       sheet.add_cell( num_of_row, i, value )
+      sheet[num_of_row][i].change_fill( "EEEEEE" )
     end
 
     #設定した列の中央揃えする
