@@ -20,7 +20,7 @@ sub main {
   my $target_tags = get_target_tag( $setting, $data_in_read_csv );
   #common_subroutines
   my $data_in_input_csv = get_data_in_csv( $setting, "input" );
-  my $hash_for_output = make_data( $data_in_input_csv, $target_tags );
+  my $hash_for_output = make_data( $setting, $data_in_input_csv, $target_tags );
   output_csv( $setting, $hash_for_output );
 }
 
@@ -44,7 +44,7 @@ sub get_target_tag {
 }
 
 sub make_data {
-  my ( $data_in_input_csv, $target_tags ) = @_;
+  my ( $setting, $data_in_input_csv, $target_tags ) = @_;
   my %data;
   foreach my $counter ( keys %$target_tags ) {
     my ( $tag_name, $tag_num ) = @{$target_tags->{$counter}};
@@ -55,8 +55,10 @@ sub make_data {
     push( @one_data, get_author_data( $data_in_input_csv, $tag_name, $tag_num ) );
     push( @one_data, get_basic_data( $data_in_input_csv, $tag_name, $tag_num ) );
     push( @one_data, make_url_data( $data_in_input_csv, $tag_name, $tag_num ) );
+    if ( make_memo_data( $setting, $tag_name, $tag_num ) ne "" ) {
+      push( @one_data, make_memo_data( $setting, $tag_name, $tag_num ) );
+    }
     push( @one_data, make_tag_data( $tag ) );
-
     $data{$counter} = \@one_data;
   }
   return \%data;
@@ -167,6 +169,21 @@ sub convert_url_for_tex {
     $url =~ s/${target_chr}/${converted_chr}/g
   }
   return $url;
+}
+
+sub make_memo_data {
+  my ( $setting, $tag_name, $tag_num ) = @_;
+  my $data_str = "";
+  my $memo_tex_dir = decode( "utf8", $setting->{"common"}->{"memo_tex_dir_path"} );
+  my $memo_tex_file_path = $memo_tex_dir . "${tag_name}/${tag_num}.tex";
+  if( -s encode( "cp932", $memo_tex_file_path) != 0 ) {
+    open( my $fh, "<", encode( "cp932", $memo_tex_file_path) );
+    my $content = do { local $/; <$fh> };
+    my $data = encode( "utf8", decode( "cp932", $content ) );
+    $data_str = "メモ：${data}";
+    close $fh;
+  }
+  return $data_str;
 }
 
 sub make_tag_data {
