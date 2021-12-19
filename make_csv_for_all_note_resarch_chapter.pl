@@ -83,16 +83,20 @@ sub get_author_data {
     } elsif ( $author ne "" and $translator ne "" ) {
       $target_data = $translator;
     }
-    my @names;
-    my @nemes_in_input_csv = split( " and ", $target_data );
-    my $num_of_nemes_in_input_csv = @nemes_in_input_csv;
-    for ( my $i = 0; $i < $num_of_nemes_in_input_csv; $i++ ) {
-      my $target_name = $nemes_in_input_csv[$i];
-      my ( $last_name, $first_name ) = split( ", ", $target_name );
-      push( @names, "${first_name} ${last_name}" );
+    if ( $target_data !~ /,/ ) {
+      return "著者・作者：${target_data}";
+    } else {
+      my @names;
+      my @nemes_in_input_csv = split( " and ", $target_data );
+      my $num_of_nemes_in_input_csv = @nemes_in_input_csv;
+      for ( my $i = 0; $i < $num_of_nemes_in_input_csv; $i++ ) {
+        my $target_name = $nemes_in_input_csv[$i];
+        my ( $last_name, $first_name ) = split( ", ", $target_name );
+        push( @names, "${first_name} ${last_name}" );
+      }
+      my $names_str = join( ", ", @names );
+      return "著者・作者：${names_str}";
     }
-    my $names_str = join( ", ", @names );
-    return "著者・作者：${names_str}";
   }
 }
 
