@@ -98,6 +98,11 @@ sub move_and_rename_file {
       my $from = $input_file_dir_path . "/" . $file_name;
       my $data_dir_path = decode( "utf8", $setting->{"common"}->{"data_dir_path"} );
       my $tag_name = $tag_and_name_list->{$tag}->{"tag_name"};
+      if ( !-d encode( "cp932", "${data_dir_path}/${tag_name}" ) ) {
+        mkdir encode( "cp932", "${data_dir_path}/${tag_name}" );
+        print encode( "cp932", "${data_dir_path}/${tag_name}が存在しなかったので作成\n" )
+      }
+
       my $name = $tag_and_name_list->{$tag}->{"name"};
       my $to;
       if ( $name =~ /\?/ or $name =~ /\|/ ) {
@@ -105,14 +110,8 @@ sub move_and_rename_file {
       } else {
         $to =$data_dir_path . "/" . $tag_name . "/" . "\[${tag}\]${name}.${extension}";
       }
-      eval {
-        move( encode( "cp932", $from ), encode( "cp932", $to ) );
-      };
-      if ($@) {
-        print encode( "cp932", "${from}を${to}としての移動失敗\n" );
-      } else {
-        print encode( "cp932", "${from}を${to}として移動完了\n" );
-      }
+      move( encode( "cp932", $from ), encode( "cp932", $to ) );
+      print encode( "cp932", "${from}を${to}として移動完了\n" );
     }
   }
 }
