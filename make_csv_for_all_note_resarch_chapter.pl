@@ -183,7 +183,7 @@ sub make_memo_data {
   if( -s encode( "cp932", $memo_tex_file_path) != 0 ) {
     open( my $fh, "<", encode( "cp932", $memo_tex_file_path) );
     my $content = do { local $/; <$fh> };
-    my $data = encode( "utf8", decode( "cp932", $content ) );
+    my $data =  decode( "cp932", $content );
     $data_str = "メモ：${data}";
     close $fh;
   }
